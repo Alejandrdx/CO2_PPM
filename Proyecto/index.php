@@ -16,14 +16,20 @@
        <div class="col-lg-15"style="padding: top 20px;">    
             <div class="card">
                 <div class="card-header">
-                    NIVELES DE CO2
+                    NIVELES DE CO2 
                 </div>
                 <div class="card-body">
                     <h5 class="card-title">VISUALIZACIÓN DE DATOS TOMADOS POR SENSOR MQ 135 + ESP32</h5>
                     <p class="card-text">En esa sección podemos observar los niveles de CO2 en este ambiente cerrado, lo cual nos ayudará a saber la probabilidad de contagio del SARS COV-2</p>
                     <div class="row">
-                        <div class="col-lg-12">
-                            <canvas id="myChart2" width="300" height="300"></canvas>
+                        <div class="col-lg-12" style="text-align:center">
+                        <p class="card-text">NIVEL PPM:</p>
+                            <label id="lblppm"></label>
+                        </div>
+                    
+                        <div class="col-lg-12" style="height: 1000px;">
+
+                            <canvas id="myChart2" class="width-3 height-3"></canvas>
                         </div>
                         
                  
@@ -42,6 +48,7 @@
 <script type="text/javascript">
 CargarDatosGraficoLineBucle();
 var myChart;
+var ultimoppm;
 function CargarDatosGraficoBar()
 {
     $.ajax({
@@ -51,6 +58,7 @@ function CargarDatosGraficoBar()
         var titulo = [];
         var cantidad=[];
         var data = JSON.parse(resp);
+        
         for(var i=0; i<data.length;i++)
         {
             cantidad.push(data[i][3])
@@ -100,17 +108,19 @@ function CargarDatosGraficoBar()
 
 }
 function CargarDatosGraficoLineBucle(){
-    for(var i = 0 ; i<50; i++){
-        setTimeout(function() {
-            if (myChart) {
-                myChart.destroy();
-            }
-            
-            CargarDatosGraficoLine()
-            
-        }, i * 5000);
-        
-    }
+    
+       
+         
+            setInterval(function(){
+                if (myChart) {
+                    myChart.destroy();
+                }
+                
+                CargarDatosGraficoLine()
+                actualizarTitulo()
+                
+            },2000)
+           
 }
 function CargarDatosGraficoLine()
 {
@@ -121,13 +131,11 @@ function CargarDatosGraficoLine()
         var titulo = [];
         var cantidad=[];
         var data = JSON.parse(resp);
+        ultimoppm= data[data.length-1][3]
         for(var i=0; i<data.length;i++)
         {
             cantidad.push(data[i][3])
-            console.log(data[i][3])
-            titulo.push(data[i][2])
-            console.log(data[i][2])
-            
+            titulo.push(data[i][2])  
         }
         var ctx = document.getElementById('myChart2');
          myChart = new Chart(ctx, {
@@ -178,5 +186,30 @@ function CargarDatosGraficoLine()
     })
     
 } 
+function actualizarTitulo(){
+    $("#lblppm").empty()
+    $("#lblppm").text(ultimoppm)
+    if (ultimoppm<=600){
+        $("#lblppm").css("background-color", "#58D68D");
 
+    }else{
+        if(ultimoppm>600 && ultimoppm<=1000){
+            $("#lblppm").css("background-color", "#F7DC6F");
+
+        }else{
+            if (ultimoppm>1000 && ultimoppm<=1500){
+                $("#lblppm").css("background-color", "#E67E22");
+            }
+            else{
+                $("#lblppm").css("background-color", "#E74C3C");
+
+            }
+
+
+        }       
+
+
+    }
+
+}
 </script>
